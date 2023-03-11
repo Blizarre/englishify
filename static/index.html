@@ -1,0 +1,56 @@
+<head>
+    <title>Englishify</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="App">
+        <header class="App-header">
+            <img src="intro.jpg" class="App-logo" alt="logo" />
+            <p>
+                Englishify your writing automatically <span class="heart">♥️</span>
+            </p>
+        </header>
+        <form onsubmit="return false;">
+            <div>
+                <textarea id="prompt" placeholder="Hello bob&#13; You can go to lunch today at noon with the team? thank you very much"></textarea>
+                <div>More conservative<input id="temperature" type="range" min="0" max="20" value="7"></input>More chatty</div>
+                <div>Formality level:
+                    <select id="formal">
+                        <option value="very">Letter to a monarch</option>
+                        <option value="work" selected>Work email</option>
+                        <option value="generic">generic text</option>
+                        <option value="casual">message to a mate</option>
+                    </select>
+                </div>
+            </div>
+            <button onclick="englishify_prompt()">Englishify!</button>
+            <div>
+                <textarea id="result" placeholder="Hi Bob,&#13;Would you like to join the team for lunch today at noon? It would be great to have you there. Thank you in advance!" disabled></textarea>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const englishify_prompt = async () => {
+            body = JSON.stringify({
+                    "prompt": document.getElementById("prompt").value,
+                    "temperature": document.getElementById("temperature").value / 10.0,
+                    "formal": document.getElementById("formal").value
+                })
+            console.log("Sending", body)
+            
+            const response_future = await fetch('/englishify', {
+                method: 'POST',
+                body: body,
+                headers: {
+                'Content-Type': 'application/json'
+                }
+            });
+            response_data = await response_future.json()
+            document.getElementById("result").value = response_data["response"]; //extract JSON from the http response
+            // do something with myJson
+        }
+    </script>
+</body>
+
+</html>

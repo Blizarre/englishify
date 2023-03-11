@@ -1,0 +1,22 @@
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 120
+disable = "missing-function-docstring,missing-class-docstring"
+
+[tool.black]
+line-length = 120
+
+[tool.poetry]
+name = "englishify"
+license = "MIT"
+version = "0.0.1"
+description = "Introducing the front-end for Chat-GPT, designed to assist in writing English text with a native-like fluency."
+authors = ["Simon Marache-Francisco <englishify@simon.marache.net>"]
+[tool.poetry.dependencies]
+fastapi = "^0.94.0"
+uvicorn = "^0.21.0"
+aiohttp = "*"
+python = ">=3.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+pylint = "*"
