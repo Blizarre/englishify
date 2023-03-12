@@ -16,12 +16,11 @@ const englishify_prompt = async () => {
             }
         });
         response_data = await response_future.json()
+        document.getElementById("result").value = response_data["response"]; //extract JSON from the http response
     } catch (e) {
         document.getElementById("alert").removeAttribute("hidden")
         return
     } finally {
         document.getElementById("spinner").setAttribute("hidden", true)
     }
-    document.getElementById("result").value = response_data["response"]; //extract JSON from the http response
-    // do something with myJson
 }

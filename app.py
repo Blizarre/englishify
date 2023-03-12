@@ -1,5 +1,5 @@
+from contextlib import asynccontextmanager
 import logging
-import os
 from enum import Enum
 
 from fastapi.staticfiles import StaticFiles
@@ -7,14 +7,26 @@ from fastapi import FastAPI
 
 import aiohttp
 from pydantic import BaseModel
+from pydantic import BaseSettings
 
 logging.basicConfig()
 logger = logging.getLogger("englishify")
 logger.setLevel(logging.INFO)
 
-app = FastAPI(title=__name__, root_path_in_servers=False)
 
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    async with aiohttp.ClientSession() as session:
+        application.state.aiohttp = session
+        yield
+
+
+class Settings(BaseSettings):
+    openai_api_key: str
+
+
+app = FastAPI(title="englishify", lifespan=lifespan)
+settings = Settings()
 
 
 class Formality(str, Enum):
@@ -60,23 +72,22 @@ async def englishify(prompt: Prompt) -> Response:
         "temperature": prompt.temperature,
     }
     logger.info("Sending payload %s", payload)
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            "https://api.openai.com/v1/chat/completions",
-            json=payload,
-            headers={
-                "Authorization": f"Bearer {OPENAI_API_KEY}",
-            },
-            timeout=30,
-        ) as response:
-            response_data = await response.json()
+    async with app.state.aiohttp.post(
+        "https://api.openai.com/v1/chat/completions",
+        json=payload,
+        headers={
+            "Authorization": f"Bearer {settings.openai_api_key}",
+        },
+        timeout=30,
+    ) as response:
+        response_data = await response.json()
 
-            if error := response_data.get("error"):
-                logger.warning("Error message from OpenAPI: %s", error["message"])
+        if error := response_data.get("error"):
+            logger.warning("Error message from OpenAPI: %s", error["message"])
 
-            response.raise_for_status()
+        response.raise_for_status()
 
-            return Response(response=response_data["choices"][0]["message"]["content"])
+        return Response(response=response_data["choices"][0]["message"]["content"])
 
 
 app.mount("/", StaticFiles(html=True, directory="static"), name="static")
