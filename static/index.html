@@ -1,56 +1,84 @@
+<!doctype html>
+<html lang="en">
+
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Englishify</title>
-    <link rel="stylesheet" href="main.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 </head>
+
 <body>
-    <div class="App">
-        <header class="App-header">
-            <img src="intro.jpg" class="App-logo" alt="logo" />
-            <p>
-                Englishify your writing automatically <span class="heart">♥️</span>
-            </p>
-        </header>
-        <form onsubmit="return false;">
-            <div>
-                <textarea id="prompt" placeholder="Hello bob&#13; You can go to lunch today at noon with the team? thank you very much"></textarea>
-                <div>More conservative<input id="temperature" type="range" min="0" max="20" value="7"></input>More chatty</div>
-                <div>Formality level:
-                    <select id="formal">
+    <div class="container-lg">
+        <div class="row mb-3">
+            <div class="col text-center">
+                <img src="intro.jpg" alt="logo" />
+                <h1 class="mt-3">
+                    Englishify your writing automatically <span class="heart">♥️</span>
+                </h1>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <textarea id="prompt" class="form-control" rows="10"
+                    placeholder="Write your message here:&#13;&#13;Hello bob, You can go to lunch today at noon with the team? thank you very much"></textarea>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label" for="temperature">Power</label>
+                <small class="form-text text-muted">low: to the point, high: chatty</small>
+            </div>
+            <div class="col-md-3">
+                <input class="form-range" id="temperature" type="range" min="0" max="20" value="7"></input>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <select class="form-select" id="formal">
                         <option value="very">Letter to a monarch</option>
                         <option value="work" selected>Work email</option>
                         <option value="generic">generic text</option>
                         <option value="casual">message to a mate</option>
                     </select>
+                    <label class="form-label" for="formal">Formality level:</label>
                 </div>
             </div>
-            <button onclick="englishify_prompt()">Englishify!</button>
-            <div>
-                <textarea id="result" placeholder="Hi Bob,&#13;Would you like to join the team for lunch today at noon? It would be great to have you there. Thank you in advance!" disabled></textarea>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <button class="btn btn-primary" type="button" onclick="englishify_prompt()">
+                    <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                        hidden></span>
+                    Englishify!
+                </button>
             </div>
-        </form>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <div id="alert" class="alert alert-warning alert-dismissible fade show row mb-3" role="alert" hidden>
+                    <strong>Oops!</strong> Something went wrong, the request didn't succeed.... Try again later.
+                    <button type="button" class="btn-close"
+                        onclick="document.getElementById('alert').setAttribute('hidden', true)"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <textarea id="result"
+                    placeholder="And see the better version there:&#13;&#13;Hi Bob,&#13;Would you like to join the team for lunch today at noon? It would be great to have you there. Thank you in advance!"
+                    class="form-control" rows="10"></textarea>
+            </div>
+        </div>
     </div>
 
-    <script>
-        const englishify_prompt = async () => {
-            body = JSON.stringify({
-                    "prompt": document.getElementById("prompt").value,
-                    "temperature": document.getElementById("temperature").value / 10.0,
-                    "formal": document.getElementById("formal").value
-                })
-            console.log("Sending", body)
-            
-            const response_future = await fetch('/englishify', {
-                method: 'POST',
-                body: body,
-                headers: {
-                'Content-Type': 'application/json'
-                }
-            });
-            response_data = await response_future.json()
-            document.getElementById("result").value = response_data["response"]; //extract JSON from the http response
-            // do something with myJson
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+        crossorigin="anonymous"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>

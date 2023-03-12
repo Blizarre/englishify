@@ -4,4 +4,4 @@ This is a small project that utilizes GPT to assist non-native English speakers 
 
 ## Run
 
-OPENAI_API_KEY=YOUR_KEY poetry run uvicorn app:app --port 8080
+OPENAI_API_KEY=YOUR_KEY poetry run uvicorn app:app --port 8080 --reload
