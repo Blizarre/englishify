@@ -7,7 +7,6 @@ const englishify_prompt = async () => {
     console.log("Sending", body)
 
     document.getElementById("spinner").removeAttribute("hidden")
-    document.getElementById("spinner").setAttribute("hidden", false)
     try {
         const response_future = await fetch('/englishify', {
             method: 'POST',
