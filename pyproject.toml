@@ -11,11 +11,13 @@ license = "MIT"
 version = "0.0.1"
 description = "Introducing the front-end for Chat-GPT, designed to assist in writing English text with a native-like fluency."
 authors = ["Simon Marache-Francisco <englishify@simon.marache.net>"]
+
 [tool.poetry.dependencies]
 fastapi = "^0.94.0"
 uvicorn = "^0.21.0"
 aiohttp = "*"
 python = ">=3.10"
+sentry-sdk = {version="^1.16.0", extras=["fastapi"]}
 
 [tool.poetry.group.dev.dependencies]
 black = "*"

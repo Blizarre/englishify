@@ -9,24 +9,17 @@ import aiohttp
 from pydantic import BaseModel
 from pydantic import BaseSettings
 
+import sentry_sdk
+from sentry_sdk import capture_message
+
 logging.basicConfig()
 logger = logging.getLogger("englishify")
 logger.setLevel(logging.INFO)
 
 
-@asynccontextmanager
-async def lifespan(application: FastAPI):
-    async with aiohttp.ClientSession() as session:
-        application.state.aiohttp = session
-        yield
-
-
 class Settings(BaseSettings):
     openai_api_key: str
-
-
-app = FastAPI(title="englishify", lifespan=lifespan)
-settings = Settings()
+    sentry_sdk_url: str
 
 
 class Formality(str, Enum):
@@ -51,6 +44,21 @@ FORMAL_PROMPT = {
 
 MAX_LEMGTH = 4096
 
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    settings = Settings()
+    application.state.settings = settings
+
+    sentry_sdk.init(
+        settings.sentry_sdk_url,
+        traces_sample_rate=1.0,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        application.state.aiohttp = session
+        yield
+
+app = FastAPI(title="englishify", lifespan=lifespan)
 
 class Prompt(BaseModel):
     prompt: str
@@ -86,7 +94,7 @@ async def englishify(prompt: Prompt) -> Response:
         "https://api.openai.com/v1/chat/completions",
         json=payload,
         headers={
-            "Authorization": f"Bearer {settings.openai_api_key}",
+            "Authorization": f"Bearer {app.state.settings.openai_api_key}",
         },
         timeout=30,
     ) as response:
@@ -94,6 +102,7 @@ async def englishify(prompt: Prompt) -> Response:
 
         if error := response_data.get("error"):
             logger.warning("Error message from OpenAPI: %s (code %d)", error["message"], response.status)
+            capture_message(error["message"])
             raise HTTPException(status_code=500, detail=error["message"])
 
         response.raise_for_status()
