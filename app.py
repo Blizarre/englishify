@@ -3,7 +3,7 @@ import logging
 from enum import Enum
 
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 import aiohttp
 from pydantic import BaseModel
@@ -43,6 +43,7 @@ FORMAL_PROMPT = {
     Formality.GENERIC: "",
 }
 
+MAX_LEMGTH = 4096
 
 class Prompt(BaseModel):
     prompt: str
@@ -56,6 +57,9 @@ class Response(BaseModel):
 
 @app.post("/englishify")
 async def englishify(prompt: Prompt) -> Response:
+    if len(prompt.prompt) > MAX_LEMGTH:
+        raise HTTPException(status_code=400, detail=f"Prompt too long (max {MAX_LEMGTH} chars)")
+    
     # https://platform.openai.com/docs/api-reference/completions/create
     payload = {
         "model": "gpt-3.5-turbo",
@@ -81,7 +85,8 @@ async def englishify(prompt: Prompt) -> Response:
         response_data = await response.json()
 
         if error := response_data.get("error"):
-            logger.warning("Error message from OpenAPI: %s", error["message"])
+            logger.warning("Error message from OpenAPI: %s (code %d)", error["message"], response.status)
+            raise HTTPException(status_code=500, detail=error["message"])
 
         response.raise_for_status()
 

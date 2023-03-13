@@ -61,7 +61,7 @@
         <div class="row mb-3">
             <div class="col">
                 <div id="alert" class="alert alert-warning alert-dismissible fade show row mb-3" role="alert" hidden>
-                    <strong>Oops!</strong> Something went wrong, the request didn't succeed.... Try again later.
+                    <span id="alert_text">There appears to have been an error. The request was unsuccessful. Please try again at a later time...</span>
                     <button type="button" class="btn-close"
                         onclick="document.getElementById('alert').setAttribute('hidden', true)"
                         aria-label="Close"></button>
@@ -73,6 +73,13 @@
                 <textarea id="result"
                     placeholder="And see the better version there:&#13;&#13;Hi Bob,&#13;Would you like to join the team for lunch today at noon? It would be great to have you there. Thank you in advance!"
                     class="form-control" rows="10"></textarea>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <button class="btn btn-secondary" type="button" onclick="copy_result()">
+                    Copy
+                </button>
             </div>
         </div>
     </div>
