@@ -2,7 +2,8 @@ const englishify_prompt = async () => {
     body = JSON.stringify({
         "prompt": document.getElementById("prompt").value,
         "temperature": document.getElementById("temperature").value / 10.0,
-        "formal": document.getElementById("formal").value
+        "formal": document.getElementById("formal").value,
+        "dialect": document.getElementById("dialect").value
     })
     console.log("Sending", body)
 

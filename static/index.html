@@ -50,6 +50,18 @@
             </div>
         </div>
         <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <select class="form-select" id="dialect">
+                        <option value="american">American</option>
+                        <option value="british" selected>British</option>
+                        <option value="australian">Australian</option>
+                    </select>
+                    <label class="form-label" for="formal">Dialect:</label>
+                </div>
+            </div>
+        </div>        
+        <div class="row mb-3">
             <div class="col">
                 <button class="btn btn-primary" type="button" onclick="englishify_prompt()">
                     <span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"

@@ -36,6 +36,12 @@ class Formality(str, Enum):
     CASUAL = "casual"
 
 
+class Dialect(str, Enum):
+    AMERICAN = "american"
+    BRITISH = "british"
+    AUSTRALIAN = "australian"
+
+
 FORMAL_PROMPT = {
     Formality.CASUAL: "Like you would talk to your best friend",
     Formality.WORK: "Like you would write on a work email to a colleague",
@@ -45,10 +51,12 @@ FORMAL_PROMPT = {
 
 MAX_LEMGTH = 4096
 
+
 class Prompt(BaseModel):
     prompt: str
     temperature: float
     formal: Formality
+    dialect: Dialect
 
 
 class Response(BaseModel):
@@ -59,7 +67,7 @@ class Response(BaseModel):
 async def englishify(prompt: Prompt) -> Response:
     if len(prompt.prompt) > MAX_LEMGTH:
         raise HTTPException(status_code=400, detail=f"Prompt too long (max {MAX_LEMGTH} chars)")
-    
+
     # https://platform.openai.com/docs/api-reference/completions/create
     payload = {
         "model": "gpt-3.5-turbo",
@@ -67,7 +75,7 @@ async def englishify(prompt: Prompt) -> Response:
             {
                 "role": "system",
                 "content": "I will write a text written by a non-native english speaker."
-                + f"I would like you to rewrite slightly it in the style of a native British speaker, {FORMAL_PROMPT[prompt.formal]}.",
+                + f"I would like you to rewrite slightly it in the style of a native {prompt.dialect} speaker, {FORMAL_PROMPT[prompt.formal]}.",
             },
             {"role": "user", "content": prompt.prompt},
         ],
