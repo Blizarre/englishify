@@ -1,6 +1,8 @@
 # Englishify
 
-This is a small project that utilizes GPT to assist non-native English speakers in improving their writing skills.
+This is a weekend project that utilizes Chat-GPT to help non-native English speakers enhance their writing abilities. It simply asks ChatGPT to rewrite their text using a selection of dialects and use cases. 
+
+It's the code behind the website https://englishify.uk.
 
 ## Run
 
