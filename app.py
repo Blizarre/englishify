@@ -54,9 +54,7 @@ class Response(BaseModel):
     response: str
 
 
-@app.post(
-    "/englishify",
-)
+@app.post("/englishify")
 async def englishify(prompt: Prompt) -> Response:
     # https://platform.openai.com/docs/api-reference/completions/create
     payload = {
@@ -71,7 +69,7 @@ async def englishify(prompt: Prompt) -> Response:
         ],
         "temperature": prompt.temperature,
     }
-    logger.info("Sending payload %s", payload)
+    logger.debug("Sending payload %s", payload)
     async with app.state.aiohttp.post(
         "https://api.openai.com/v1/chat/completions",
         json=payload,
