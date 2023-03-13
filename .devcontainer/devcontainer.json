@@ -7,7 +7,7 @@
   "updateContentCommand": "pip install poetry && poetry install",
   "postCreateCommand": "",
   "postAttachCommand": {
-    "server": "poetry run uvicorn main:app --reload"
+    "server": "poetry run uvicorn app:app --reload"
   },
   "portsAttributes": {
     "5000": {
