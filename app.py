@@ -36,10 +36,10 @@ class Dialect(str, Enum):
 
 
 FORMAL_PROMPT = {
-    Formality.CASUAL: "Like you would talk to your best friend",
-    Formality.WORK: "Like you would write on a work email to a colleague",
-    Formality.VERY: "Like you would write on a letter to a monarch",
-    Formality.GENERIC: "",
+    Formality.CASUAL: "I would like you to rewrite it in the style of a very casual message by a {dialect} to its friend",
+    Formality.WORK: "I would like you to rewrite it slightly in the style of a business email written by a native {dialect} to a colleague.",
+    Formality.VERY: "I would like you to rewrite it as if it was a letter to a powerful monarch written by a {dialect}",
+    Formality.GENERIC: "I would like you to rewrite it slightly in the style of a native {dialect} in a business context.",
 }
 
 MAX_LEMGTH = 4096
@@ -82,8 +82,8 @@ async def englishify(prompt: Prompt) -> Response:
         "messages": [
             {
                 "role": "system",
-                "content": "I will write a text written by a non-native english speaker."
-                + f"I would like you to rewrite slightly it in the style of a native {prompt.dialect} speaker, {FORMAL_PROMPT[prompt.formal]}.",
+                "content": "I will write a text written by a non-native english speaker. "
+                + FORMAL_PROMPT[prompt.formal].format(dialect=prompt.dialect)
             },
             {"role": "user", "content": prompt.prompt},
         ],
