@@ -42,7 +42,7 @@ FORMAL_PROMPT = {
     Formality.GENERIC: "I would like you to rewrite it slightly in the style of a native {dialect} in a business context.",
 }
 
-MAX_LEMGTH = 4096
+MAX_LENGTH = 4096
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -73,8 +73,8 @@ class Response(BaseModel):
 
 @app.post("/englishify")
 async def englishify(prompt: Prompt) -> Response:
-    if len(prompt.prompt) > MAX_LEMGTH:
-        raise HTTPException(status_code=400, detail=f"Prompt too long (max {MAX_LEMGTH} chars)")
+    if len(prompt.prompt) > MAX_LENGTH:
+        raise HTTPException(status_code=400, detail=f"Prompt too long (max {MAX_LENGTH} chars)")
 
     # https://platform.openai.com/docs/api-reference/completions/create
     payload = {
