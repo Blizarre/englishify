@@ -24,21 +24,27 @@ class Settings(BaseSettings):
 
 class Formality(str, Enum):
     VERY = "very"
-    WORK = "work"
+    EMAIL = "email"
     GENERIC = "generic"
     CASUAL = "casual"
 
 
 class Dialect(str, Enum):
-    AMERICAN = "an american"
-    BRITISH = "a british"
-    AUSTRALIAN = "an australian"
-    GENERIC = "an english"
+    AMERICAN = "american"
+    BRITISH = "british"
+    AUSTRALIAN = "australian"
+    GENERIC = "generic"
 
+DIALECT_STRING = {
+    Dialect.AMERICAN: "an american",
+    Dialect.BRITISH: "a british",
+    Dialect.AUSTRALIAN: "an australian",
+    Dialect.GENERIC: "an english",
+}
 
 FORMAL_PROMPT = {
     Formality.CASUAL: "I would like you to rewrite it in the style of a very casual message by {dialect} speaker to its friend",
-    Formality.WORK: "I would like you to rewrite it slightly in the style of a business email written by {dialect} speaker to a colleague.",
+    Formality.EMAIL: "I would like you to rewrite it slightly in the style of a business email written by {dialect} speaker to a colleague.",
     Formality.VERY: "I would like you to rewrite it as if it was a letter to a powerful monarch written by {dialect} speaker",
     Formality.GENERIC: "I would like you to rewrite it slightly in the style of {dialect} speaker in a business context.",
 }
@@ -84,7 +90,7 @@ async def englishify(prompt: Prompt) -> Response:
             {
                 "role": "system",
                 "content": "I will write a text written by a non-native english speaker. "
-                + FORMAL_PROMPT[prompt.formal].format(dialect=prompt.dialect)
+                + FORMAL_PROMPT[prompt.formal].format(dialect=DIALECT_STRING[prompt.dialect])
             },
             {"role": "user", "content": prompt.prompt},
         ],

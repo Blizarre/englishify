@@ -40,7 +40,7 @@ const show_alert = (message) => {
     alert = document.getElementById("alert")
     alert_text = document.getElementById("alert_text")
     if (message) {
-        alert_text.innerText = message    
+        alert_text.innerText = message
     } else {
         alert_text.innerText = "Something went wrong, the request didn't succeed.... Try again later"
     }
