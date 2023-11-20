@@ -16,18 +16,42 @@ const englishify_prompt = async () => {
                 'Content-Type': 'application/json'
             }
         });
-        if (response.status >= 400) {
-            message=null
+
+        if (!response.ok) {
+            message = null
             try {
-                response_data = await response.json()
-                message = response_data["detail"]
+                message = "Error: " + (await response.json()).detail
             } catch (_) {
                 message = "There appears to have been an error. The request was unsuccessful. Please try again at a later time..."
             }
             show_alert(message)
         }
-        response_data = await response.json()
-        document.getElementById("result").value = response_data["response"]; //extract JSON from the http response
+
+        const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+        result_html = document.getElementById("result")
+        result_html.value = ""
+
+        let buffer = ""
+        while (true) {
+            const data = await reader.read()
+            if (data.done) {
+                break
+            }
+            buffer += data.value
+            const lines = buffer.split("\n")
+            // Draining the buffer from all the complete chunks
+            while (lines.length > 1) {
+                chunk = JSON.parse(lines.shift())
+                if (chunk.delta.content) {
+                    result_html.value += chunk.delta.content
+                }
+                if (chunk.finish_reason) {
+                    break
+                }
+            }
+            // Updating the buffer with the unfinished chunks
+            buffer = lines.shift()
+        }
     } catch (e) {
         document.getElementById("alert").removeAttribute("hidden")
         return

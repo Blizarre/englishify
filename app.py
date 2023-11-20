@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 import logging
 from enum import Enum
+from fastapi.responses import StreamingResponse
 
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException
 
-import aiohttp
+from openai import APIError, AuthenticationError, OpenAI
+
 from pydantic import BaseModel
 from pydantic import BaseSettings
 
@@ -18,7 +20,6 @@ logger.setLevel(logging.INFO)
 
 
 class Settings(BaseSettings):
-    openai_api_key: str
     sentry_sdk_url: str
 
 
@@ -34,6 +35,7 @@ class Dialect(str, Enum):
     BRITISH = "british"
     AUSTRALIAN = "australian"
     GENERIC = "generic"
+
 
 DIALECT_STRING = {
     Dialect.AMERICAN: "an american",
@@ -51,6 +53,7 @@ FORMAL_PROMPT = {
 
 MAX_LENGTH = 4096
 
+
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     settings = Settings()
@@ -61,11 +64,12 @@ async def lifespan(application: FastAPI):
         traces_sample_rate=1.0,
     )
 
-    async with aiohttp.ClientSession() as session:
-        application.state.aiohttp = session
-        yield
+    application.state.client = OpenAI()
+    yield
+
 
 app = FastAPI(title="englishify", lifespan=lifespan)
+
 
 class Prompt(BaseModel):
     prompt: str
@@ -82,39 +86,37 @@ class Response(BaseModel):
 async def englishify(prompt: Prompt) -> Response:
     if len(prompt.prompt) > MAX_LENGTH:
         raise HTTPException(status_code=400, detail=f"Prompt too long (max {MAX_LENGTH} chars)")
+    logger.info("Received request, forwarding it to OpenAI")
+    openai: OpenAI = app.state.client
 
-    # https://platform.openai.com/docs/api-reference/completions/create
-    payload = {
-        "model": "gpt-3.5-turbo",
-        "messages": [
-            {
-                "role": "system",
-                "content": "I will write a text written by a non-native english speaker. "
-                + FORMAL_PROMPT[prompt.formal].format(dialect=DIALECT_STRING[prompt.dialect])
-            },
-            {"role": "user", "content": prompt.prompt},
-        ],
-        "temperature": prompt.temperature,
-    }
-    logger.debug("Sending payload %s", payload)
-    async with app.state.aiohttp.post(
-        "https://api.openai.com/v1/chat/completions",
-        json=payload,
-        headers={
-            "Authorization": f"Bearer {app.state.settings.openai_api_key}",
-        },
-        timeout=30,
-    ) as response:
-        response_data = await response.json()
+    try:
+        stream = openai.chat.completions.create(
+            model="gpt-4-1106-preview",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "I will write a text written by a non-native english speaker. "
+                    + FORMAL_PROMPT[prompt.formal].format(dialect=DIALECT_STRING[prompt.dialect]),
+                },
+                {"role": "user", "content": prompt.prompt},
+            ],
+            temperature=prompt.temperature,
+            stream=True,
+        )
+    except AuthenticationError as e:
+        logger.exception("Invalid API key")
+        raise HTTPException(status_code=500, detail="Something went wrong with the authentication to OpenAI. Please retry later.")
+    except APIError as e:
+        logger.exception("Unknown OpenAI Error")
+        raise HTTPException(status_code=500, detail=e.message)
 
-        if error := response_data.get("error"):
-            logger.warning("Error message from OpenAPI: %s (code %d)", error["message"], response.status)
-            capture_message(error["message"])
-            raise HTTPException(status_code=500, detail=error["message"])
+    def steam_response():
+        """Forward the chunks to the client, one per line"""
+        for part in stream: yield part.choices[0].model_dump_json() + "\n"
 
-        response.raise_for_status()
+    logger.info("Received response, streaming it to the client")
 
-        return Response(response=response_data["choices"][0]["message"]["content"])
+    return StreamingResponse(steam_response())
 
 
 app.mount("/", StaticFiles(html=True, directory="static"), name="static")

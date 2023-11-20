@@ -1,6 +1,6 @@
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 120
-disable = "missing-function-docstring,missing-class-docstring"
+disa2ble = "missing-function-docstring,missing-class-docstring"
 
 [tool.black]
 line-length = 120
@@ -15,9 +15,9 @@ authors = ["Simon Marache-Francisco <englishify@simon.marache.net>"]
 [tool.poetry.dependencies]
 fastapi = "^0.94.0"
 uvicorn = "^0.21.0"
-aiohttp = "*"
+openai = "1.2.3"
 python = ">=3.10"
-sentry-sdk = {version="^1.16.0", extras=["fastapi"]}
+sentry-sdk = { version = "^1.16.0", extras = ["fastapi"] }
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
