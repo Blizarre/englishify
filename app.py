@@ -51,7 +51,7 @@ FORMAL_PROMPT = {
     Formality.GENERIC: "I would like you to rewrite it slightly in the style of {dialect} speaker in a business context.",
 }
 
-MAX_LENGTH = 4096
+MAX_LENGTH = 10000
 
 
 @asynccontextmanager
@@ -91,7 +91,7 @@ async def englishify(prompt: Prompt) -> Response:
 
     try:
         stream = openai.chat.completions.create(
-            model="gpt-4-1106-preview",
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",
